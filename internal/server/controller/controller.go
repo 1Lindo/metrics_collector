@@ -33,17 +33,21 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Unsupported Media Type", http.StatusUnsupportedMediaType)
 	}
 
-	parts := strings.Split(req.URL.Path, "/")
+	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
+	if len(parts) != 4 {
+		http.Error(res, "Invalid URL format", http.StatusNotFound)
+	}
 
-	metricType := parts[2]
-	metricName := parts[3]
-	metricValue := parts[4]
+	metricType, metricName, metricValue := parts[1], parts[2], parts[3]
 
+	// Проверка имени метрики
+	if metricName == Empty {
+		http.Error(res, "Metric name is required", http.StatusNotFound)
+	}
+
+	var err error
 	switch metricType {
 	case Gauge:
-		if metricName != "testGauge" {
-			http.Error(res, "Такое имя метрики не обнаружена", http.StatusNotFound)
-		}
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
@@ -54,9 +58,6 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		c.srv.AddMetrics(metric)
 		res.WriteHeader(http.StatusOK)
 	case Counter:
-		if metricName != "testCounter" {
-			http.Error(res, "Такое имя метрики не обнаружена", http.StatusNotFound)
-		}
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
@@ -68,5 +69,8 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusOK)
 	default:
 		http.Error(res, "Неподдерживаемый тип метрики", http.StatusBadRequest)
+	}
+	if err != nil {
+		http.Error(res, "Invalid value", http.StatusBadRequest)
 	}
 }
