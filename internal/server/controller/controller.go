@@ -5,6 +5,7 @@ import (
 	"github.com/1Lindo/metrics_collector/internal/server/service"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -31,16 +32,19 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	if contentType != "text/plain" {
 		http.Error(res, "Unsupported Media Type", http.StatusUnsupportedMediaType)
 	}
-	metricTypeStr := req.URL.Query().Get("type")
-	metricNameStr := req.URL.Query().Get("name")
-	metricValueStr := req.URL.Query().Get("value")
 
-	switch metricNameStr {
+	parts := strings.Split(req.URL.RawQuery, "/")
+
+	metricType := parts[2]
+	metricName := parts[3]
+	metricValue := parts[4]
+
+	switch metricName {
 	case Gauge:
-		if metricTypeStr != "float64" {
+		if metricType != "float64" {
 			http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
 		}
-		gauge, err := strconv.ParseFloat(metricValueStr, 64)
+		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
 		}
@@ -50,10 +54,10 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		c.srv.AddMetrics(metric)
 		res.WriteHeader(http.StatusOK)
 	case Counter:
-		if metricTypeStr != "int64" {
+		if metricType != "int64" {
 			http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
 		}
-		counter, err := strconv.ParseInt(metricValueStr, 10, 64)
+		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
 		}
