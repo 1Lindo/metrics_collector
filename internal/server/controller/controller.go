@@ -52,7 +52,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	case Gauge:
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
-			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
+			http.Error(res, "Ошибка конвертации", http.StatusBadRequest)
 		}
 		metric := models.MetricsData{
 			Gauge: gauge,
@@ -62,7 +62,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	case Counter:
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
-			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
+			http.Error(res, "Ошибка конвертации", http.StatusBadRequest)
 		}
 		metric := models.MetricsData{
 			Counter: counter,
