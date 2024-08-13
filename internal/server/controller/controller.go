@@ -35,11 +35,11 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 
 	parts := strings.Split(req.URL.RawQuery, "/")
 
-	//metricType := parts[2]
-	metricName := parts[3]
+	metricType := parts[2]
+	//metricName := parts[3]
 	metricValue := parts[4]
 
-	switch metricName {
+	switch metricType {
 	case Gauge:
 		//if metricType != "float64" {
 		//	http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
