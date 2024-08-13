@@ -36,6 +36,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
 	if len(parts) != 4 {
 		http.Error(res, "Invalid URL format", http.StatusNotFound)
+		return
 	}
 
 	metricType, metricName, metricValue := parts[1], parts[2], parts[3]
@@ -43,6 +44,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	// Проверка имени метрики
 	if metricName == Empty {
 		http.Error(res, "Metric name is required", http.StatusNotFound)
+		return
 	}
 
 	var err error
