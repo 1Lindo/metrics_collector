@@ -35,15 +35,15 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 
 	parts := strings.Split(req.URL.RawQuery, "/")
 
-	metricType := parts[2]
+	//metricType := parts[2]
 	metricName := parts[3]
 	metricValue := parts[4]
 
 	switch metricName {
 	case Gauge:
-		if metricType != "float64" {
-			http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
-		}
+		//if metricType != "float64" {
+		//	http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
+		//}
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
@@ -54,9 +54,9 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		c.srv.AddMetrics(metric)
 		res.WriteHeader(http.StatusOK)
 	case Counter:
-		if metricType != "int64" {
-			http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
-		}
+		//if metricType != "int64" {
+		//	http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
+		//}
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
