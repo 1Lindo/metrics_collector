@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/1Lindo/metrics_collector/internal/server/models"
 	"github.com/1Lindo/metrics_collector/internal/server/service"
 	"net/http"
@@ -33,17 +34,17 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "Unsupported Media Type", http.StatusUnsupportedMediaType)
 	}
 
-	parts := strings.Split(req.URL.RawQuery, "/")
+	parts := strings.Split(req.URL.Path, "/")
 
 	metricType := parts[2]
-	//metricName := parts[3]
+	metricName := parts[3]
 	metricValue := parts[4]
-
+	fmt.Println(parts)
 	switch metricType {
 	case Gauge:
-		//if metricType != "float64" {
-		//	http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
-		//}
+		if metricName != "testGauge" {
+			http.Error(res, "Такое имя метрики не обнаружена", http.StatusNotFound)
+		}
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
@@ -54,9 +55,9 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		c.srv.AddMetrics(metric)
 		res.WriteHeader(http.StatusOK)
 	case Counter:
-		//if metricType != "int64" {
-		//	http.Error(res, "Ошибка типа данных", http.StatusInternalServerError)
-		//}
+		if metricName != "testCounter" {
+			http.Error(res, "Такое имя метрики не обнаружена", http.StatusNotFound)
+		}
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			http.Error(res, "Ошибка конвертации", http.StatusInternalServerError)
@@ -66,9 +67,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		}
 		c.srv.AddMetrics(metric)
 		res.WriteHeader(http.StatusOK)
-	case Empty:
-		http.Error(res, "Отсутствует название метрики", http.StatusNotFound)
 	default:
-		http.Error(res, "Неподдерживаемая метрика", http.StatusBadRequest)
+		http.Error(res, "Неподдерживаемый тип метрики", http.StatusBadRequest)
 	}
 }

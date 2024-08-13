@@ -15,7 +15,7 @@ func InitServer(c controller.Controller) {
 
 func newRouter(c controller.Controller) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/update", c.UpdateMetrics)
+	mux.HandleFunc("/update/", c.UpdateMetrics)
 
 	return mux
 }
