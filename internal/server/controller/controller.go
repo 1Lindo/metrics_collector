@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/1Lindo/metrics_collector/internal/server/models"
 	"github.com/1Lindo/metrics_collector/internal/server/service"
 	"net/http"
@@ -39,7 +38,7 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	metricType := parts[2]
 	metricName := parts[3]
 	metricValue := parts[4]
-	fmt.Println(parts)
+
 	switch metricType {
 	case Gauge:
 		if metricName != "testGauge" {
