@@ -30,13 +30,10 @@ func (m *MemStorage) AddMetrics(newMetric models.MetricsData, metricType string)
 		}
 	}
 
-	for k, v := range newMetric.Counter {
-		if _, ok := m.data.Counter[k]; ok {
+	if metricType == models.Counter {
+		for k, v := range newMetric.Counter {
 			m.data.Counter[k] += v
-		} else {
-			m.data.Counter[k] = v
 		}
 	}
-
 	log.Printf("new value -> %v", m.data)
 }
