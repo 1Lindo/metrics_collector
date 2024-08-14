@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	Gauge   = "gauge"
-	Counter = "counter"
-	Empty   = ""
-)
-
 type Controller struct {
 	srv *service.Service
 }
@@ -42,35 +36,35 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	metricType, metricName, metricValue := parts[1], parts[2], parts[3]
 
 	// Проверка имени метрики
-	if metricName == Empty {
+	if metricName == models.Empty {
 		http.Error(res, "Metric name is required", http.StatusNotFound)
 		return
 	}
 
 	var err error
 	switch metricType {
-	case Gauge:
+	case models.Gauge:
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
-			http.Error(res, "Ошибка конвертации", http.StatusBadRequest)
+			http.Error(res, "Converting error, check metric value type", http.StatusBadRequest)
 		}
 		metric := models.MetricsData{
-			Gauge: gauge,
+			Gauge: map[string]float64{metricName: gauge},
 		}
-		c.srv.AddMetrics(metric)
+		c.srv.AddMetrics(metric, metricType)
 		res.WriteHeader(http.StatusOK)
-	case Counter:
+	case models.Counter:
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
-			http.Error(res, "Ошибка конвертации", http.StatusBadRequest)
+			http.Error(res, "Converting error, check metric value type", http.StatusBadRequest)
 		}
 		metric := models.MetricsData{
-			Counter: counter,
+			Counter: map[string]int64{metricName: counter},
 		}
-		c.srv.AddMetrics(metric)
+		c.srv.AddMetrics(metric, metricType)
 		res.WriteHeader(http.StatusOK)
 	default:
-		http.Error(res, "Неподдерживаемый тип метрики", http.StatusBadRequest)
+		http.Error(res, "Unsupported metric type", http.StatusBadRequest)
 	}
 	if err != nil {
 		http.Error(res, "Invalid value", http.StatusBadRequest)

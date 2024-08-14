@@ -17,6 +17,6 @@ func InitCollectorService(repo *repository.MemStorage) *Service {
 	return srv
 }
 
-func (s *Service) AddMetrics(metric models.MetricsData) {
-	s.repo.AddMetrics(metric)
+func (s *Service) AddMetrics(metric models.MetricsData, metricType string) {
+	s.repo.AddMetrics(metric, metricType)
 }
