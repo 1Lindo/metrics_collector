@@ -35,13 +35,11 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 
 	metricType, metricName, metricValue := parts[1], parts[2], parts[3]
 
-	// Проверка имени метрики
 	if metricName == models.Empty {
 		http.Error(res, "Metric name is required", http.StatusNotFound)
 		return
 	}
 
-	var err error
 	switch metricType {
 	case models.Gauge:
 		gauge, err := strconv.ParseFloat(metricValue, 64)
@@ -65,8 +63,5 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusOK)
 	default:
 		http.Error(res, "Unsupported metric type", http.StatusBadRequest)
-	}
-	if err != nil {
-		http.Error(res, "Invalid value", http.StatusBadRequest)
 	}
 }
