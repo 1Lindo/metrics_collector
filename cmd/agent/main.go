@@ -30,14 +30,11 @@ func main() {
 		}
 	}()
 
-	for {
-		select {
-		case <-ticker.C:
-			mu.Lock()
-			prv.SendValue(data)
-			count = 0
-			mu.Unlock()
-		}
+	for range ticker.C {
+		mu.Lock()
+		prv.SendValue(data)
+		count = 0
+		mu.Unlock()
 	}
 
 }
