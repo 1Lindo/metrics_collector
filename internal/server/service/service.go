@@ -5,22 +5,30 @@ import (
 	"github.com/1Lindo/metrics_collector/internal/server/repository"
 )
 
-type Service struct {
-	repo *repository.MemStorage
+type Service interface {
+	AddMetrics(metric models.MetricsData, metricType string) bool
+	GetAllMetrics() models.MetricsData
 }
 
-func InitCollectorService(repo *repository.MemStorage) *Service {
-	srv := &Service{
+type service struct {
+	repo repository.MemStorage
+}
+
+func InitCollectorService(repo repository.MemStorage) Service {
+	srv := service{
 		repo: repo,
 	}
 
 	return srv
 }
 
-func (s *Service) AddMetrics(metric models.MetricsData, metricType string) {
-	s.repo.AddMetrics(metric, metricType)
+func (s service) AddMetrics(metric models.MetricsData, metricType string) bool {
+	if ok := s.repo.AddMetrics(metric, metricType); !ok {
+		return false
+	}
+	return true
 }
 
-func (s *Service) GetAllMetrics() models.MetricsData {
+func (s service) GetAllMetrics() models.MetricsData {
 	return s.repo.GetAllMetrics()
 }

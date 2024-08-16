@@ -4,13 +4,18 @@ import (
 	"github.com/1Lindo/metrics_collector/internal/server/models"
 )
 
-type MemStorage struct {
+type MemStorage interface {
+	AddMetrics(newMetric models.MetricsData, metricType string) bool
+	GetAllMetrics() models.MetricsData
+}
+
+type memStorage struct {
 	data models.MetricsData
 }
 
 // Симуляция хранилища метрик
-func InitRepository() *MemStorage {
-	repo := &MemStorage{
+func InitRepository() MemStorage {
+	repo := &memStorage{
 		data: models.MetricsData{
 			Gauge:   map[string]float64{},
 			Counter: map[string]int64{},
@@ -20,21 +25,24 @@ func InitRepository() *MemStorage {
 	return repo
 }
 
-func (m *MemStorage) AddMetrics(newMetric models.MetricsData, metricType string) {
+func (m *memStorage) AddMetrics(newMetric models.MetricsData, metricType string) bool {
 
 	if metricType == models.Gauge {
 		for k, v := range newMetric.Gauge {
 			m.data.Gauge[k] = v
 		}
+		return true
 	}
 
 	if metricType == models.Counter {
 		for k, v := range newMetric.Counter {
 			m.data.Counter[k] += v
 		}
+		return true
 	}
+	return false
 }
 
-func (m *MemStorage) GetAllMetrics() models.MetricsData {
+func (m *memStorage) GetAllMetrics() models.MetricsData {
 	return m.data
 }

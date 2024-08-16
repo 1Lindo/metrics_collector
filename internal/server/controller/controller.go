@@ -9,23 +9,29 @@ import (
 	"strings"
 )
 
-type Controller struct {
-	srv *service.Service
+type Controller interface {
+	UpdateMetrics(res http.ResponseWriter, req *http.Request)
+	GetMetrics(res http.ResponseWriter, req *http.Request)
+}
+type controller struct {
+	srv service.Service
 }
 
-func InitController(s *service.Service) Controller {
-	return Controller{
+func InitController(s service.Service) Controller {
+	return controller{
 		srv: s,
 	}
 }
 
-func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
+func (c controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	contentType := req.Header.Get("Content-Type")
 	if req.Method != http.MethodPost {
 		http.Error(res, "Status Method Is Not Allowed", http.StatusMethodNotAllowed)
+		return
 	}
 	if contentType != "text/plain" {
 		http.Error(res, "Unsupported Media Type", http.StatusUnsupportedMediaType)
+		return
 	}
 
 	parts := strings.Split(strings.Trim(req.URL.Path, "/"), "/")
@@ -46,34 +52,51 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 		gauge, err := strconv.ParseFloat(metricValue, 64)
 		if err != nil {
 			http.Error(res, "Converting error, check metric value type", http.StatusBadRequest)
+			return
 		}
 		metric := models.MetricsData{
 			Gauge: map[string]float64{metricName: gauge},
 		}
-		c.srv.AddMetrics(metric, metricType)
+		if ok := c.srv.AddMetrics(metric, metricType); !ok {
+			http.Error(res, "Repository err", http.StatusBadRequest)
+			return
+		}
 		res.WriteHeader(http.StatusOK)
 	case models.Counter:
 		counter, err := strconv.ParseInt(metricValue, 10, 64)
 		if err != nil {
 			http.Error(res, "Converting error, check metric value type", http.StatusBadRequest)
+			return
 		}
 		metric := models.MetricsData{
 			Counter: map[string]int64{metricName: counter},
 		}
-		c.srv.AddMetrics(metric, metricType)
+		if ok := c.srv.AddMetrics(metric, metricType); !ok {
+			http.Error(res, "Repository err", http.StatusBadRequest)
+			return
+		}
 		res.WriteHeader(http.StatusOK)
 	default:
 		http.Error(res, "Unsupported metric type", http.StatusBadRequest)
+		return
 	}
 }
 
-func (c Controller) GetMetrics(res http.ResponseWriter, req *http.Request) {
+func (c controller) GetMetrics(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		http.Error(res, "Status Method Is Not Allowed", http.StatusMethodNotAllowed)
+		return
 	}
 	data := c.srv.GetAllMetrics()
-	dataJson, _ := json.Marshal(&data)
+	dataJSON, err := json.Marshal(&data)
+	if err != nil {
+		http.Error(res, "JSON parsing error", http.StatusInternalServerError)
+		return
+	}
 
 	res.WriteHeader(http.StatusOK)
-	res.Write(dataJson)
+	if _, err := res.Write(dataJSON); err != nil {
+		http.Error(res, "Sending response error", http.StatusInternalServerError)
+		return
+	}
 }
