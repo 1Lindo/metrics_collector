@@ -105,6 +105,8 @@ func Test_UpdateMetrics(t *testing.T) {
 			ctrl.UpdateMetrics(rec, req)
 
 			res := rec.Result()
+			defer res.Body.Close()
+
 			assert.Equal(t, tt.expectedStatus, res.StatusCode)
 		})
 	}
@@ -127,6 +129,7 @@ func Test_GetMetrics(t *testing.T) {
 	ctrl.GetMetrics(rec, req)
 
 	res := rec.Result()
+	defer res.Body.Close()
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
 	var responseData models.MetricsData
