@@ -2,7 +2,6 @@ package repository
 
 import (
 	"github.com/1Lindo/metrics_collector/internal/server/models"
-	"log"
 )
 
 type MemStorage struct {
@@ -22,7 +21,6 @@ func InitRepository() *MemStorage {
 }
 
 func (m *MemStorage) AddMetrics(newMetric models.MetricsData, metricType string) {
-	log.Printf("old value -> %v", m.data)
 
 	if metricType == models.Gauge {
 		for k, v := range newMetric.Gauge {
@@ -35,5 +33,8 @@ func (m *MemStorage) AddMetrics(newMetric models.MetricsData, metricType string)
 			m.data.Counter[k] += v
 		}
 	}
-	log.Printf("new value -> %v", m.data)
+}
+
+func (m *MemStorage) GetAllMetrics() models.MetricsData {
+	return m.data
 }

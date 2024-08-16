@@ -20,3 +20,7 @@ func InitCollectorService(repo *repository.MemStorage) *Service {
 func (s *Service) AddMetrics(metric models.MetricsData, metricType string) {
 	s.repo.AddMetrics(metric, metricType)
 }
+
+func (s *Service) GetAllMetrics() models.MetricsData {
+	return s.repo.GetAllMetrics()
+}

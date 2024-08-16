@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"github.com/1Lindo/metrics_collector/internal/server/models"
 	"github.com/1Lindo/metrics_collector/internal/server/service"
 	"net/http"
@@ -64,4 +65,15 @@ func (c Controller) UpdateMetrics(res http.ResponseWriter, req *http.Request) {
 	default:
 		http.Error(res, "Unsupported metric type", http.StatusBadRequest)
 	}
+}
+
+func (c Controller) GetMetrics(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(res, "Status Method Is Not Allowed", http.StatusMethodNotAllowed)
+	}
+	data := c.srv.GetAllMetrics()
+	dataJson, _ := json.Marshal(&data)
+
+	res.WriteHeader(http.StatusOK)
+	res.Write(dataJson)
 }
